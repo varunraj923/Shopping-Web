@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const LoginNav = () => {
+    navigate("/login");
+  };
+
+  const Logout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
 
   return (
     <nav className="bg-blue-700 text-white shadow-md">
@@ -12,19 +23,20 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex space-x-6">
-            <a href="#" className="hover:text-gray-200 transition">Home</a>
-            <a href="#" className="hover:text-gray-200 transition">Products</a>
-            <a href="#" className="hover:text-gray-200 transition">About</a>
-            <a href="#" className="hover:text-gray-200 transition">Contact</a>
+            <button className="hover:text-gray-200 transition" onClick={() => navigate("/")}>Home</button>
+            <button className="hover:text-gray-200 transition" onClick={() => navigate("/cart")}>Cart</button>
+            <button className="hover:text-gray-200 transition" onClick={Logout}>Logout</button>
           </div>
 
           <div className="hidden md:flex">
-            <button className="bg-white text-blue-700 px-4 py-1 rounded hover:bg-gray-100">
+            <button
+              onClick={LoginNav}
+              className="bg-white text-blue-700 px-4 py-1 rounded hover:bg-gray-100"
+            >
               Login
             </button>
           </div>
 
-          {/* Mobile menu toggle button */}
           <div className="md:hidden">
             <button onClick={() => setMenuOpen(!menuOpen)}>
               <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
@@ -39,14 +51,21 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile dropdown menu */}
       {menuOpen && (
         <div className="md:hidden px-4 pb-4 space-y-2">
-          <a href="#" className="block">Home</a>
-          <a href="#" className="block">Cart</a>
-          <a href="#" className="block">Logout</a>
-         
-          <button className="w-full bg-white text-blue-700 px-4 py-2 rounded mt-2" onClick={"/login"}>
+          <button onClick={() => navigate("/")} className="block w-full text-left hover:text-gray-200">
+            Home
+          </button>
+          <button onClick={() => navigate("/cart")} className="block w-full text-left hover:text-gray-200">
+            Cart
+          </button>
+          <button onClick={Logout} className="block w-full text-left hover:text-gray-200">
+            Logout
+          </button>
+          <button
+            onClick={LoginNav}
+            className="w-full bg-white text-blue-700 px-4 py-2 rounded mt-2"
+          >
             Login
           </button>
         </div>
@@ -56,3 +75,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
