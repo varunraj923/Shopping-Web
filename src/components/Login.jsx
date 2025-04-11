@@ -7,7 +7,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
-  const [signup, setSignup] = useState(true);
+  const [signup, setSignup] = useState(false);
   const navigate = useNavigate();
 
   const HandleSignup = () => {
@@ -16,17 +16,15 @@ const Login = () => {
 
   const SignupSubmit = async () => {
     try {
-      const res = await axios.post('https://fakestoreapi.com/users', {
+      await axios.post('https://fakestoreapi.com/users', {
         email,
         username,
         password,
       });
-
-      setToken(res.data.token);
-      localStorage.setItem('token', res.data.token);
-      navigate('/home');
+      alert('Signup successful. Please log in.');
+      setSignup(false);
     } catch (err) {
-      console.error('Signup/Login failed:', err.response?.data || err.message);
+      console.error('Signup failed:', err.response?.data || err.message);
       alert('Signup failed: ' + (err.response?.data || err.message));
     }
   };
@@ -38,9 +36,22 @@ const Login = () => {
         password,
       });
 
-      setToken(res.data.token);
-      localStorage.setItem('token', res.data.token);
-      navigate('/home');
+      const receivedToken = res.data.token;
+
+      if (receivedToken) {
+        setToken(receivedToken);
+        localStorage.setItem('token', receivedToken);
+        document.cookie = `token=${receivedToken}; path=/; max-age=86400`;
+
+        const savedToken = localStorage.getItem("token");
+        if (savedToken) {
+          navigate('/home');
+        } else {
+          alert("Login failed: token not stored correctly.");
+        }
+      } else {
+        alert("Login failed: Invalid token received.");
+      }
     } catch (err) {
       console.error('Login failed:', err.response?.data || err.message);
       alert('Login failed: ' + (err.response?.data || err.message));
@@ -120,6 +131,10 @@ const Login = () => {
 };
 
 export default Login;
+
+
+
+
 
 
 

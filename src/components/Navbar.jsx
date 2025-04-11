@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const LoginNav = () => {
-    navigate("/login");
-  };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token); 
+  }, [location]); 
 
-  const Logout = () => {
+  const handleLogout = () => {
     localStorage.removeItem("token");
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    setIsLoggedIn(false);
     navigate("/login");
   };
 
@@ -23,18 +28,11 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex space-x-6">
-            <button className="hover:text-gray-200 transition" onClick={() => navigate("/")}>Home</button>
+            <button className="hover:text-gray-200 transition" onClick={() => navigate("/home")}>Home</button>
             <button className="hover:text-gray-200 transition" onClick={() => navigate("/cart")}>Cart</button>
-            <button className="hover:text-gray-200 transition" onClick={Logout}>Logout</button>
-          </div>
-
-          <div className="hidden md:flex">
-            <button
-              onClick={LoginNav}
-              className="bg-white text-blue-700 px-4 py-1 rounded hover:bg-gray-100"
-            >
-              Login
-            </button>
+            {isLoggedIn && location.pathname === "/home" && (
+              <button className="hover:text-gray-200 transition" onClick={handleLogout}>Logout</button>
+            )}
           </div>
 
           <div className="md:hidden">
@@ -53,21 +51,17 @@ const Navbar = () => {
 
       {menuOpen && (
         <div className="md:hidden px-4 pb-4 space-y-2">
-          <button onClick={() => navigate("/")} className="block w-full text-left hover:text-gray-200">
+          <button onClick={() => navigate("/home")} className="block w-full text-left hover:text-gray-200">
             Home
           </button>
           <button onClick={() => navigate("/cart")} className="block w-full text-left hover:text-gray-200">
             Cart
           </button>
-          <button onClick={Logout} className="block w-full text-left hover:text-gray-200">
-            Logout
-          </button>
-          <button
-            onClick={LoginNav}
-            className="w-full bg-white text-blue-700 px-4 py-2 rounded mt-2"
-          >
-            Login
-          </button>
+          {isLoggedIn && location.pathname === "/home" && (
+            <button onClick={handleLogout} className="block w-full text-left hover:text-gray-200">
+              Logout
+            </button>
+          )}
         </div>
       )}
     </nav>
@@ -75,4 +69,7 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
+
 
