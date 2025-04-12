@@ -36,7 +36,7 @@ const Login = () => {
         password,
       });
 
-      console.log(res);
+   
 
       const receivedToken = res.data.token;
 

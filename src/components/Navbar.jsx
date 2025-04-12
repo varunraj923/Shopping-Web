@@ -10,7 +10,7 @@ const Navbar = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token); 
-  }, [location]); 
+  }, [location]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -27,14 +27,16 @@ const Navbar = () => {
             <span className="text-2xl font-bold tracking-wide">🛒 FakeStore</span>
           </div>
 
-          <div className="hidden md:flex space-x-6">
-            <button className="hover:text-gray-200 transition" onClick={() => navigate("/home")}>Home</button>
-            <button className="hover:text-gray-200 transition" onClick={() => navigate("/cart")}>Cart</button>
-            {isLoggedIn && location.pathname === "/home" && (
+         
+          {isLoggedIn && (
+            <div className="hidden md:flex space-x-6">
+              <button className="hover:text-gray-200 transition" onClick={() => navigate("/home")}>Home</button>
+              <button className="hover:text-gray-200 transition" onClick={() => navigate("/cart")}>Cart</button>
               <button className="hover:text-gray-200 transition" onClick={handleLogout}>Logout</button>
-            )}
-          </div>
+            </div>
+          )}
 
+      
           <div className="md:hidden">
             <button onClick={() => setMenuOpen(!menuOpen)}>
               <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
@@ -49,7 +51,8 @@ const Navbar = () => {
         </div>
       </div>
 
-      {menuOpen && (
+   
+      {menuOpen && isLoggedIn && (
         <div className="md:hidden px-4 pb-4 space-y-2">
           <button onClick={() => navigate("/home")} className="block w-full text-left hover:text-gray-200">
             Home
@@ -57,11 +60,9 @@ const Navbar = () => {
           <button onClick={() => navigate("/cart")} className="block w-full text-left hover:text-gray-200">
             Cart
           </button>
-          {isLoggedIn && location.pathname === "/home" && (
-            <button onClick={handleLogout} className="block w-full text-left hover:text-gray-200">
-              Logout
-            </button>
-          )}
+          <button onClick={handleLogout} className="block w-full text-left hover:text-gray-200">
+            Logout
+          </button>
         </div>
       )}
     </nav>
@@ -69,6 +70,7 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
 
 
 

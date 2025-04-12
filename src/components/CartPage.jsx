@@ -1,79 +1,121 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
-  const userId = 1; // Replace with dynamic userId if needed
-
-  const fetchCartData = async () => {
-    try {
-      // Step 1: Get all carts
-      const cartRes = await axios.get("https://fakestoreapi.com/carts");
-
-      // Step 2: Filter cart for current user
-      const userCart = cartRes.data.filter(cart => cart.userId === userId);
-
-      // Step 3: Extract products with quantity
-      const productMap = {};
-      userCart.forEach(cart => {
-        cart.products.forEach(prod => {
-          if (!productMap[prod.productId]) {
-            productMap[prod.productId] = prod.quantity;
-          } else {
-            productMap[prod.productId] += prod.quantity;
-          }
-        });
-      });
-
-      const productIds = Object.keys(productMap);
-
-      // Step 4: Fetch product details
-      const productDetails = await Promise.all(
-        productIds.map(id => axios.get(`https://fakestoreapi.com/products/${id}`))
-      );
-
-      // Step 5: Combine with quantity
-      const fullCart = productDetails.map(res => ({
-        ...res.data,
-        quantity: productMap[res.data.id]
-      }));
-
-      setCartItems(fullCart);
-    } catch (err) {
-      console.error("Error fetching cart data:", err.message);
-    }
-  };
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
-    fetchCartData();
+    const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    setCartItems(savedCart);
+    calculateTotal(savedCart);
   }, []);
 
+  const calculateTotal = (items) => {
+    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    setTotalPrice(total);
+  };
+
+  const removeItem = (productId) => {
+    const updatedCart = cartItems.filter(item => item.id !== productId);
+    setCartItems(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    calculateTotal(updatedCart);
+  };
+
+  const updateQuantity = (productId, newQuantity) => {
+    if (newQuantity < 1) {
+      removeItem(productId);
+      return;
+    }
+
+    const updatedCart = cartItems.map(item => 
+      item.id === productId ? { ...item, quantity: newQuantity } : item
+    );
+    
+    setCartItems(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    calculateTotal(updatedCart);
+  };
+
+  const placeOrder = () => {
+    setToastVisible(true);
+    setTimeout(() => {
+      setToastVisible(false);
+      setCartItems([]);
+      localStorage.removeItem('cart');
+    }, 3000);
+  };
+
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
-      {cartItems.length === 0 ? (
-        <p className="text-gray-500">Loading cart...</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {cartItems.map(item => (
-            <div key={item.id} className="bg-white p-4 rounded-lg shadow-md">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="h-40 w-full object-contain mb-4"
-              />
-              <h2 className="text-lg font-semibold">{item.title}</h2>
-              <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
-              <div className="mt-2 text-indigo-600 font-bold">₹{Math.floor(item.price * 80)}</div>
-              <div className="text-sm mt-1">Quantity: {item.quantity}</div>
-            </div>
-          ))}
+    <div className="p-4 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">🛒 Your Cart</h1>
+
+      {toastVisible && (
+        <div className="fixed top-5 right-5 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+          ✅ Order placed successfully!
         </div>
+      )}
+
+      {cartItems.length === 0 ? (
+        <p className="text-gray-600">Your cart is empty</p>
+      ) : (
+        <>
+          <div className="space-y-4">
+            {cartItems.map(item => (
+              <div key={item.id} className="flex items-center justify-between bg-white shadow p-4 rounded-lg">
+                <div className="flex items-center space-x-4">
+                  <img src={item.image} alt={item.title} className="w-16 h-16 object-contain" />
+                  <div>
+                    <p className="font-semibold">{item.title}</p>
+                    <div className="flex items-center mt-2">
+                      <button 
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="w-8 h-8 flex items-center justify-center border rounded-lg"
+                      >
+                        -
+                      </button>
+                      <span className="mx-3">{item.quantity}</span>
+                      <button 
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="w-8 h-8 flex items-center justify-center border rounded-lg"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-indigo-600 font-semibold mr-4">
+                    ₹{Math.floor(item.price * 80 * item.quantity)}
+                  </span>
+                  <button 
+                    onClick={() => removeItem(item.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex items-center justify-between">
+            <div className="text-xl font-bold">Total: ₹{Math.floor(totalPrice * 80)}</div>
+            <button
+              onClick={placeOrder}
+              className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
+            >
+              Place Order
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
 };
 
 export default CartPage;
+
 
 
