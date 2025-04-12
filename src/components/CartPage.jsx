@@ -48,7 +48,7 @@ const CartPage = () => {
   };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="p-4 max-w-4xl mx-auto mb-64">
       <h1 className="text-2xl font-bold mb-4">🛒 Your Cart</h1>
 
       {toastVisible && (
