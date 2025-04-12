@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
 import Login from './components/Login';
 import Body from './components/Body';
+import CartPage from './components/CartPage';
 
 const App = () => {
   return (
@@ -12,6 +13,7 @@ const App = () => {
           <Route index element={<Navigate to="/login" />} />
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/cart" element={<CartPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
